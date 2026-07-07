@@ -20,7 +20,7 @@ class MeuBot(discord.Client):
 
     async def on_ready(self):
         print(f"Bot conectado como {self.user}")
-        print("Bot online esperando o comando /japinha.")
+        print("Bot online esperando os comandos /japinha e /brad.")
 
 
 bot = MeuBot()
@@ -41,6 +41,37 @@ async def japinha(interaction: discord.Interaction):
 
     await interaction.response.send_message(
         "Japinha marcado no canal configurado.",
+        ephemeral=True
+    )
+
+
+@bot.tree.command(name="brad", description="Manda os emotes do Brad no canal específico")
+async def brad(interaction: discord.Interaction):
+    canal = bot.get_channel(CHANNEL_ID)
+
+    if canal is None:
+        await interaction.response.send_message(
+            "Não consegui encontrar o canal configurado. Verifique o CHANNEL_ID.",
+            ephemeral=True
+        )
+        return
+
+    mensagem = (
+        "<:bradBA:1405185253030756374> "
+        "<:bradBless:1405762786377601054> "
+        "<:bradFlu:1410784279780130816> "
+        "<:bradIPHONE:1437251628372852876> "
+        "<:bradKQ:1419466403462778900> "
+        "<:bradSparrow:1440148797073129564> "
+        "<:bradfla:1402800738194686063> "
+        "<:bradnatal:1453390129954816235> "
+        "<:branana:1078395075849101373>"
+    )
+
+    await canal.send(mensagem)
+
+    await interaction.response.send_message(
+        "Emotes enviados no canal configurado.",
         ephemeral=True
     )
 
