@@ -5,6 +5,7 @@ from discord import app_commands
 TOKEN = os.getenv("DISCORD_TOKEN")
 FRIEND_ID = int(os.getenv("FRIEND_ID"))
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+GUILD_ID = int(os.getenv("GUILD_ID"))
 
 intents = discord.Intents.default()
 
@@ -15,8 +16,15 @@ class MeuBot(discord.Client):
         self.tree = app_commands.CommandTree(self)
 
     async def setup_hook(self):
-        await self.tree.sync()
-        print("Comandos slash sincronizados.")
+        guild = discord.Object(id=GUILD_ID)
+
+        # Copia os comandos globais para o servidor específico
+        self.tree.copy_global_to(guild=guild)
+
+        # Sincroniza os comandos diretamente nesse servidor
+        await self.tree.sync(guild=guild)
+
+        print("Comandos slash sincronizados no servidor.")
 
     async def on_ready(self):
         print(f"Bot conectado como {self.user}")
