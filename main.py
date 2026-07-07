@@ -1,44 +1,48 @@
 import os
 import discord
-from discord.ext import tasks
-from datetime import time
-from zoneinfo import ZoneInfo
+from discord import app_commands
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 FRIEND_ID = int(os.getenv("FRIEND_ID"))
-
-# Horário de Fortaleza/Natal/Brasil: UTC-3
-FUSO_BRASIL = ZoneInfo("America/Fortaleza")
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 
 intents = discord.Intents.default()
 
 
 class MeuBot(discord.Client):
+    def __init__(self):
+        super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)
+
     async def setup_hook(self):
-        ping_diario.start()
+        await self.tree.sync()
+        print("Comandos slash sincronizados.")
 
     async def on_ready(self):
         print(f"Bot conectado como {self.user}")
+        print("Bot online esperando o comando /japinha.")
 
 
-bot = MeuBot(intents=intents)
+bot = MeuBot()
 
 
-@tasks.loop(time=time(hour=0, minute=0, tzinfo=FUSO_BRASIL))
-async def ping_diario():
+@bot.tree.command(name="japinha", description="Marca o Japinha em um canal específico")
+async def japinha(interaction: discord.Interaction):
     canal = bot.get_channel(CHANNEL_ID)
 
     if canal is None:
-        print("Canal não encontrado. Verifique o CHANNEL_ID.")
+        await interaction.response.send_message(
+            "Não consegui encontrar o canal configurado. Verifique o CHANNEL_ID.",
+            ephemeral=True
+        )
         return
 
-    await canal.send(f"<@{FRIEND_ID}> meia-noite chegou.")
+    await canal.send(f"<@{FRIEND_ID}>")
 
-
-@ping_diario.before_loop
-async def antes_do_ping():
-    await bot.wait_until_ready()
+    await interaction.response.send_message(
+        "Japinha marcado no canal configurado.",
+        ephemeral=True
+    )
 
 
 if not TOKEN:
